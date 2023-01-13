@@ -1,3 +1,4 @@
 apiKey =7b0efcfcda364ab8b9548356945bbf7a
 base_url_get =https://api.spoonacular.com/recipes/complexSearch
 base_url_post =https://api.spoonacular.com/recipes/cuisine
+baseUrl=http://localhost:8189/market/api/v1/
