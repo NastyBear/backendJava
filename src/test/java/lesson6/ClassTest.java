@@ -1,7 +1,9 @@
-package lesson5;
+package lesson6;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import lesson5.CategoryService;
+import lesson5.Product;
+import lesson5.ProductService;
 import lesson5.utils.RetrofitUtils;
 import lombok.SneakyThrows;
 import okhttp3.ResponseBody;
@@ -10,22 +12,27 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import retrofit2.Response;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+public class ClassTest {
 
-public class ProductTest {
+    public static ProductService productService;
+
+    Product product;
+    Product product2;
+    String result;
+    int id;
+    static String resource;
+    SqlSession session = null;
 
     public static void main( String[] args ) throws IOException {
         SqlSession session = null;
@@ -64,4 +71,46 @@ public class ProductTest {
 
 
     }
+    static db.dao.CategoriesMapper categoriesMapper;
+    static CategoryService categoryService;
+    @BeforeAll
+    static void beforeAll() throws IOException {
+        categoryService = RetrofitUtils.getRetrofit().create(CategoryService.class);
+    }
+
+    @Test
+
+    void getProductTest () throws IOException {
+        db.model.Categories categories = new db.model.Categories();
+        categories.setTitle("apple");
+        categoriesMapper.insert(categories);
+        session.commit();
+    }
+
+    @Test
+    void createProductTest() throws IOException {
+
+        Response<Product> response = productService.createProduct(product).execute();
+        id = response.body().getId();
+        assertThat(response.isSuccessful(),CoreMatchers.is(true));
+        db.model.CategoriesExample example2 = new db.model.CategoriesExample();
+        example2.createCriteria().andTitleLike("%apple%");
+        List<db.model.Categories> list2 = categoriesMapper.selectByExample(example2);
+
+    }
+    //    @Test
+//     void modifyProductTest () throws IOException {
+//        Response<Product>response = productService.modifyProduct(result).execute();
+//        assertThat(response.body().getTitle(), equalTo("Cheese"));
+//    }
+
+    @SneakyThrows
+        //@AfterEach
+        //@Test
+    void tearDown(){
+        Response<ResponseBody>response = productService.deleteProduct(id).execute();
+        assertThat(response.isSuccessful(),CoreMatchers.is(true));
+    }
+
+
 }
